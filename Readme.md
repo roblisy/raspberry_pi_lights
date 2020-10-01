@@ -22,7 +22,7 @@ using [system.md](https://www.raspberrypi.org/documentation/linux/usage/systemd.
     
 ### Configuration
 
-Most things should be controable using variables.
+Most things should be controllable using variables.
     
     sleep_seconds = number of seconds to sleep code execution in the loop
     mins_before_sunset = number of minutes prior to sunset to turn the lights on
