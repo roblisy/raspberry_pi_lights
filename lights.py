@@ -20,29 +20,31 @@ location = astral.LocationInfo(
     longitude=-122.3631)
 
 # how long to sleep our loop for...
-sleep_seconds = 30
+sleep_seconds: int = 30
 # number of minutes before sunset to turn the lights on.
-mins_before_sunset = 30
+mins_before_sunset: int = 30
 # turn off at this local time (11:30 pm)
-off_at_hour_minute = datetime.time(23, 30)
+off_at_hour_minute: datetime.time = datetime.time(21, 14)
 
 # GPIO pins for Raspberry Pi
 GPIO.setmode(GPIO.BCM)
 GPIO.setwarnings(False)
 pinList = [2, 3, 4, 17, 27, 22, 10, 9]
 
-def get_sunset_sunrise(loc, dt):
+
+def get_sunset_sunrise(loc: astral.LocationInfo,
+                       dt: datetime):
     """
     Function to get the sunrise and sunset at a location
-    :param loc: location to deterimine the sunrise / sunset
-    :param dt: date to determin the sunrise / sunset for
+    :param loc: location to determine the sunrise / sunset
+    :param dt: date to determine the sunrise / sunset for
     :return:
     """
     l = sun(loc.observer, date=dt, tzinfo=loc.timezone)
     return l["sunrise"], l["sunset"]
 
 
-def ctrl_lights(state):
+def ctrl_lights(state: str):
     """
     Function to turn on and off all of the relays
     :return:
@@ -73,7 +75,7 @@ def main():
     # - check the current time
     # - compare the current time to sunset
     # - if the current time is within 30 minutes of sunset, turn on the lights
-    # - if the current time is after 11:30 pm, turn off the lights.
+    # - if the current time is after 11:30 pm or prior to 30 minutes before sunset, turn off the lights.
 
     while True:
         now = pytz.timezone(tz).localize(datetime.datetime.now())
@@ -91,7 +93,8 @@ def main():
         if (now >= turn_on_at) & (now <= turn_off_at):
             ctrl_lights("on")
 
-        if now >= turn_off_at:
+        # If it's after time to turn off the lights or not yet time to turn them on, turn them off...
+        if (now <= turn_on_at) or (now >= turn_off_at):
             ctrl_lights("off")
         time.sleep(sleep_seconds)
 
