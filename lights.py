@@ -7,7 +7,6 @@ import astral
 import datetime
 import pytz
 from astral.sun import sun
-import logging
 import RPi.GPIO as GPIO
 import time
 
@@ -21,15 +20,16 @@ location = astral.LocationInfo(
     longitude=-122.3631)
 
 # how long to sleep our loop for...
-sleep_seconds = 3
+sleep_seconds = 30
+# number of minutes before sunset to turn the lights on.
+mins_before_sunset = 30
+# turn off at this local time (11:30 pm)
+off_at_hour_minute = datetime.time(23, 30)
 
 # GPIO pins for Raspberry Pi
 GPIO.setmode(GPIO.BCM)
 GPIO.setwarnings(False)
 pinList = [2, 3, 4, 17, 27, 22, 10, 9]
-
-logging.basicConfig(filename='lights.log', filemode='w', format='%(name)s - %(levelname)s - %(message)s')
-
 
 def get_sunset_sunrise(loc, dt):
     """
@@ -74,23 +74,22 @@ def main():
     # - check the current time
     # - compare the current time to sunset
     # - if the current time is within 30 minutes of sunset, turn on the lights
-    # - if the current time is after 11 pm, turn off the lights.
+    # - if the current time is after 11:30 pm, turn off the lights.
 
     while True:
         now = pytz.timezone(tz).localize(datetime.datetime.now())
         today = datetime.date.today()
 
         # turn off the lights at 11:30 pm, local time
-        turn_off_at = pytz.timezone(tz).localize(datetime.datetime.combine(today, datetime.time(23, 30)))
-        # print(f"Now: {now}")
-        # print(f"Off: {turn_off_at}")
+        turn_off_at = pytz.timezone(tz).localize(datetime.datetime.combine(today, off_at_hour_minute))
         sunrise, sunset = get_sunset_sunrise(loc=location, dt=today)
+        turn_on_at = sunset - datetime.timedelta(minutes=mins_before_sunset)
 
         # uncomment below to use user input instead of date time...
         # get_user_input()
-        print('Currently running python3 /home/pi/raspberry_lights/lights.py from /etc/rc.local...')
+
         # if now is 30 minutes before sunset, turn the lights on...
-        if (now >= sunset) & (now <= turn_off_at):
+        if (now >= turn_on_at) & (now <= turn_off_at):
             ctrl_lights("on")
 
         if now >= turn_off_at:
