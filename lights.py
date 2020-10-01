@@ -39,7 +39,6 @@ def get_sunset_sunrise(loc, dt):
     :return:
     """
     l = sun(loc.observer, date=dt, tzinfo=loc.timezone)
-    logging.debug("""Sunrise at l["sunrise"]""")
     return l["sunrise"], l["sunset"]
 
 
