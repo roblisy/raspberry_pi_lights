@@ -1,0 +1,14 @@
+[Unit]
+Description=Raspberry Lights
+After=network.target
+
+[Service]
+ExecStart=/usr/bin/python3 -u /home/pi/raspberry_lights/lights.py
+WorkingDirectory=/home/pi/raspberry_lights
+StandardOutput=inherit
+StandardError=inherit
+Restart=always
+User=pi
+
+[Install]
+WantedBy=multi-user.target
